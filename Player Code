@@ -57,4 +57,19 @@ func player_death():
 #func _on_Area2D_body_entered(area):
 	#print("Kills the enemy now")
 	#area.queue_free()
-	
+
+######## ZACH GRAB THIS CODE FOR THE PLAYER TO GET THE SPEED BOOOOOST ###########
+
+func player_power_up():
+	speed = speed + 75
+	print(speed)
+
+
+func hearts_collected():
+	hearts = hearts + 1
+	print(hearts)
+
+func slow_motion_time():
+	speed = speed - 75
+	print(speed)
+

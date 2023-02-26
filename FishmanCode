@@ -1,0 +1,85 @@
+###This tutorial was used to help with creating the enemy AI : https://youtu.be/4WywpSBncFI ######
+###This tutorial was used to help will layering and collisions: https://youtu.be/3rrPr90Oras ####
+
+extends KinematicBody2D
+
+var velocity = Vector2(0,0)
+
+var enemy_moving_left = true
+
+#Exporting variables that can be changed in the editor for ease of access for Level Designer
+export var speed = 20
+export var gravity = 30
+
+
+#making variables names to lessen the amount of code on screen
+onready var animated_sprite = $AnimatedSprite
+onready var pit_or_wall_ahead = $WallorPit
+onready var enemy_hit_area = $AttackArea
+onready var animation_player_playing_attack = $AnimatedSprite/AnimationPlayer
+onready var animation_player_playing_walk = $AnimatedSprite/AnimationPlayer
+
+
+func _ready():
+	animation_player_playing_walk.play("walk")
+	
+	
+func _process(_delta):
+	enemy_movement()
+	endless_pit_ahead()
+	hitting_the_wall()
+	
+	#telling the enemy to attack the player
+	if animation_player_playing_attack.current_animation == "attack":
+		return
+		
+func enemy_movement():
+	
+	#enemy movement on the x-axis
+	if enemy_moving_left:
+		velocity.x = speed
+	else:
+		velocity.x = -speed
+	
+	#Creating gravity for the enemy
+	velocity.y = velocity.y + gravity
+	
+	#allows the enemy to move and jump
+	velocity = move_and_slide(velocity, Vector2.UP)
+
+
+#This is using the ray casting to figure out if there is a wall beneath or not 
+func endless_pit_ahead():
+	if not pit_or_wall_ahead.is_colliding() and is_on_floor():
+		enemy_moving_left = !enemy_moving_left
+		scale.x = -scale.x
+		#print("Pit ahead")
+
+#raycasting being used to detect walls ahead
+func hitting_the_wall():
+	if  pit_or_wall_ahead.is_colliding() and is_on_wall():
+		enemy_moving_left = !enemy_moving_left
+		scale.x = -scale.x
+		#print("hitting a wall")
+
+#Connecting the Dectecting Player to body entered signal
+func _on_DetectingPlayer_body_entered(body):
+	animation_player_playing_attack.play("attack")
+	#print("Player detected")
+	
+	
+#Connecting the AttackArea to body entered signal
+func _on_AttackArea_body_entered(body):
+	get_tree().reload_current_scene()
+	#print("Player Died")
+
+func hit():
+	enemy_hit_area.monitoring = true
+	#print("attacking player")
+
+func end_of_hit():
+	enemy_hit_area.monitoring = false
+	#print("enemy stopped attacking player")
+
+func return_to_walking():
+	animation_player_playing_walk.play("walk")

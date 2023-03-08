@@ -1,0 +1,75 @@
+########## Video used for refrencing for player attacks https://youtu.be/LG0aZEz5lQk ###########
+
+extends KinematicBody2D
+
+var velocity = Vector2(0,0)
+
+#Exporting variables that can be changed in the editor for ease of access for Level Designer
+export var speed = 180
+export var gravity = 30
+export var jump_height = -900
+export var player_health = 1
+
+#making variables names to lessen the amount of code on screen
+onready var animated_sprite = $AnimatedSprite
+
+func _physics_process(_delta):
+	
+	player_input()
+	
+	#if player reaches a certain distance on the y axis the player will be reset to the begining of the level
+	if velocity.y > 3_500:
+		player_death()
+
+func player_input():
+	
+	#Creating Gravity in the world
+	velocity.y = velocity.y + gravity
+	
+	#player control inputs and playing animated sprite depending on the action being done
+	if Input.is_action_pressed("move_right"):
+		animated_sprite.play("run")
+		animated_sprite.flip_h = false
+		velocity.x = speed
+	
+	elif Input.is_action_pressed("move_left"):
+		animated_sprite.play("run")
+		animated_sprite.flip_h = true
+		velocity.x = -speed
+	
+	elif Input.is_action_just_pressed("jump_up") and is_on_floor():
+		#animated_sprite.play("jump") no animated made yet
+		velocity.y = jump_height
+		
+	#if no button is being pressed the player will go into idle animation
+	else:
+		animated_sprite.play("idle")
+		#player_punch.disabled == true
+	
+	#allows the player to move and jump
+	velocity = move_and_slide(velocity, Vector2.UP)
+	
+	velocity.x = lerp(velocity.x,0,0.2)
+	
+func player_death():
+	get_tree().reload_current_scene()
+	
+#func _on_Area2D_body_entered(area):
+	#print("Kills the enemy now")
+	#area.queue_free()
+
+######## ZACH GRAB THIS CODE FOR THE PLAYER TO GET THE SPEED BOOOOOST ###########
+
+func player_power_up():
+	speed = speed + 75
+	print(speed)
+
+
+func hearts_collected():
+	hearts = hearts + 1
+	print(hearts)
+
+func slow_motion_time():
+	speed = speed - 75
+	print(speed)
+
